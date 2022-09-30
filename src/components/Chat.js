@@ -6,15 +6,23 @@ import { v4 as uuidv4 } from 'uuid'
 import CardRight from './Card/CardRight'
 import CardLeft from './Card/CardLeft'
 import axios from 'axios'
+import useUser from './Hooks/useUser'
 
-const socket = io.connect("http://localhost:5000")
+const socket = io.connect("https://chatserver.mdtamiz.xyz/")
 const Chat = () => {
-    const url = 'http://localhost:5000/messages'
+    const user = useUser()
+    const url = 'https://chatserver.mdtamiz.xyz/messages'
     const { isLoading, data: messages, refetch } = useQuery(['All Messages'], () =>
         axios.get(url)
             .then(res => res.data)
     )
     const scroolRef = useRef()
+
+    useEffect(() => {
+        if (user) {
+            socket.emit('new_user', user.email)
+        }
+    }, [user])
 
     useEffect(() => {
         // scroolRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -46,7 +54,6 @@ const Chat = () => {
         socket.on("new_connection", (data) => {
             setNewuser(data.email)
             clearBal()
-            refetch()
         })
     }, [refetch])
     const [show, setShow] = useState(true)
@@ -77,7 +84,7 @@ const Chat = () => {
         e.preventDefault()
         const date = new Date()
         if (message) {
-            socket.emit('send_message', { message: message, email: 'tamizrabbi@gmail.com', date: date, name: "Tamiz" })
+            socket.emit('send_message', { message: message, email: user.email, date: date, name: user.name })
             refetch()
             setMessage('')
         }
@@ -116,7 +123,7 @@ const Chat = () => {
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="#" className="flex items-center">
+                                    <a href="#!" className="flex items-center">
                                         <span className="flex items-center justify-center text-indigo-100 hover:bg-indigo-700 h-12 w-12 rounded-2xl">
                                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -125,7 +132,7 @@ const Chat = () => {
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="#" className="flex items-center">
+                                    <a href="#!" className="flex items-center">
                                         <span className="flex items-center justify-center text-indigo-100 hover:bg-indigo-700 h-12 w-12 rounded-2xl">
                                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -155,7 +162,7 @@ const Chat = () => {
                                 <div className="mt-5">
                                     <ul className="flex flex-row items-center justify-between">
                                         <li>
-                                            <a href="#" className="flex items-center pb-3 text-xs font-semibold relative text-indigo-800">
+                                            <a href="#!" className="flex items-center pb-3 text-xs font-semibold relative text-indigo-800">
                                                 <span>All Conversations</span>
                                                 <span className="absolute left-0 bottom-0 h-1 w-6 bg-indigo-800 rounded-full" />
                                             </a>
@@ -305,7 +312,7 @@ const Chat = () => {
                                         </>
                                         :
                                         messages?.map(message => {
-                                            if (message.email === "tamizrabbi@gmail.com") {
+                                            if (message.email === user.email) {
                                                 return (
                                                     <CardRight key={message._id} data={message} />
                                                 )

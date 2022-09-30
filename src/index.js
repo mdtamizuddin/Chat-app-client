@@ -5,13 +5,18 @@ import io from 'socket.io-client'
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { BrowserRouter } from 'react-router-dom';
 const queryClient = new QueryClient()
+io.connect("https://chatserver.mdtamiz.xyz/")
 
-io.connect("http://localhost:5000")
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
+
 root.render(
   <QueryClientProvider client={queryClient}>
-    <App />
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
   </QueryClientProvider>
 );
 

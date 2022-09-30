@@ -7,6 +7,7 @@ const CardLeft = ({ data }) => {
                 </div>
                 <div className="relative ml-3 text-sm bg-white py-2 px-4 shadow rounded-xl">
                     <div>{data.message}</div>
+                    <span className="text-[10px] font-semibold text-red-300">{data.name}</span>
                 </div>
             </div>
         </div>
