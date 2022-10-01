@@ -72,8 +72,11 @@ iframe::-webkit-scrollbar {
   visibility: visible;
 }
 
+.h-resp {
+  height: 77vh;
+}
+
 .chat-container {
-  height: 97vh;
   padding-left: 20px;
   padding-right: 50px;
   width: 100%;
@@ -85,6 +88,19 @@ iframe::-webkit-scrollbar {
     /* 384px */
   ;
   overflow: hidden;
+}
+
+.delete-button:hover {
+  background-color: #d1ccec;
+  border-radius: 20%;
+}
+
+.delete-button {
+  display: none;
+}
+
+.msg-con:hover .delete-button {
+  display: block;
 }
 
 @media only screen and (max-width: 1400px) {
@@ -129,6 +145,9 @@ iframe::-webkit-scrollbar {
     display: none;
   }
 
+  .h-resp {
+    height: 65vh;
+  }
   .chat-main-container {
     height: 80vh;
   }
@@ -143,7 +162,7 @@ iframe::-webkit-scrollbar {
   }
 
   .chat-container {
-    height: 85vh;
+    height: 85vh !important;
     padding-left: 10px;
     padding-right: 10px;
     width: 100%;

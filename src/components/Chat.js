@@ -1,61 +1,35 @@
-import React, { useEffect, useRef, useState } from 'react'
-import audioFile from './Notification.mp3'
-import io from 'socket.io-client'
+import React, { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { v4 as uuidv4 } from 'uuid'
 import CardRight from './Card/CardRight'
 import CardLeft from './Card/CardLeft'
-import axios from 'axios'
 import useUser from './Hooks/useUser'
+import api from './Hooks/instance'
+import Usercard from './Card/Usercard'
 
-const socket = io.connect("https://chatserver.mdtamiz.xyz/")
 const Chat = () => {
     const user = useUser()
-    const url = 'https://chatserver.mdtamiz.xyz/messages'
-    const { isLoading, data: messages, refetch } = useQuery(['All Messages'], () =>
-        axios.get(url)
+    const [selected, setSelected] = useState({ email: 'mdtomiz.official@gmail.com', name: "Developer" })
+    const { isLoading, data: messages, refetch } = useQuery(
+        ['todos'],
+        async () => {
+            const res = await api.get(`/messages/${user.email}`)
+            return res.data
+        },
+        {
+            refetchInterval: 1000,
+        },
+    )
+
+    const { isLoading: loadinguser, data: users, } = useQuery(['All users'], () =>
+        api.get(`/user`)
             .then(res => res.data)
     )
-    const scroolRef = useRef()
 
-    useEffect(() => {
-        if (user) {
-            socket.emit('new_user', user.email)
-        }
-    }, [user])
-
-    useEffect(() => {
-        // scroolRef.current?.scrollIntoView({ behavior: "smooth" })
-        setInterval(() => {
-            const objDiv = document.getElementById("message-container");
-            objDiv.scrollTop = objDiv.scrollHeight;
-        }, 500);
-    }, [])
     const bottom = () => {
         const objDiv = document.getElementById("message-container");
-        // scroolRef.current?.scrollIntoView({ behavior: "smooth" })
-        objDiv.scrollTop = objDiv?.scrollHeight;
+        objDiv.scrollTop = objDiv.scrollHeight;
     }
-    const [newUser, setNewuser] = useState('')
-    const clearBal = () => {
-        setInterval(() => {
-            setNewuser('')
-
-        }, 5000);
-    }
-    useEffect(() => {
-        const audio = new Audio(audioFile)
-        socket.on("recive_message", (data) => {
-            refetch()
-            audio.play()
-        });
-    }, [refetch])
-    useEffect(() => {
-        socket.on("new_connection", (data) => {
-            setNewuser(data.email)
-            clearBal()
-        })
-    }, [refetch])
+    const newUser = ''
     const [show, setShow] = useState(true)
     const [showNav, setNavshow] = useState(false)
     const navigationhandler = () => {
@@ -83,16 +57,31 @@ const Chat = () => {
     const sendMessage = (e) => {
         e.preventDefault()
         const date = new Date()
+        const newMessage = {
+            message: message,
+            email: user.email,
+            date: date,
+            name: user.name,
+            to: selected.email,
+            from: user.email
+        }
         if (message) {
-            socket.emit('send_message', { message: message, email: user.email, date: date, name: user.name })
-            refetch()
             setMessage('')
+            api.post(`/messages/new`, newMessage)
+                .then(res => {
+                    if (res.status === 200) {
+                        refetch()
+                    }
+                })
         }
     }
+    if (loadinguser) {
+        return
+    }
     return (
-        <div onClick={() => refetch()}>
+        <div >
             <div className="chat-main-container h-screen antialiased text-gray-800">
-                <div className={`${showNav ? "show-side" : "side-bar-chat"}`}>
+                <div className={`${showNav ? "show-side" : "side-bar-chat"} ${user.email !== "mdtomiz.official@gmail.com" && "hidden"}`}>
                     <div className={`flex flex-row ${show ? 'sidebar-w-96' : ''} flex-shrink-0 bg-gray-100 py-2 h-full`}>
                         <div className="flex flex-col items-center py-4 flex-shrink-0 w-16 bg-indigo-800 ">
                             <div
@@ -169,96 +158,21 @@ const Chat = () => {
                                         </li>
                                     </ul>
                                 </div>
-                                <div className="mt-5">
-                                    <div className="text-xs text-gray-400 font-semibold uppercase">Team</div>
-                                </div>
-                                <div className="mt-2">
+                                <div className="mt-2 overflow-y-auto overflow-x-hidden">
                                     <div className="flex flex-col -mx-4">
-                                        <div className="relative flex flex-row items-center p-4">
-                                            <div className="flex items-center justify-center h-10 w-10 rounded-full bg-pink-500 text-pink-300 font-bold flex-shrink-0">
-                                                T
-                                            </div>
-                                            <div className="flex flex-col flex-grow ml-3">
-                                                <div className="text-sm  font-medium">Cuberto</div>
-                                                <div className="text-xs truncate w-40">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Debitis, doloribus?</div>
-                                            </div>
-                                        </div>
-                                        <div className="flex flex-row items-center p-4 bg-gradient-to-r from-red-100 to-transparent border-l-2 border-red-500">
-                                            <div className="flex items-center justify-center h-10 w-10 rounded-full bg-pink-500 text-pink-300 font-bold flex-shrink-0">
-                                                T
-                                            </div>
-                                            <div className="flex flex-col flex-grow ml-3">
-                                                <div className="flex items-center">
-                                                    <div className="text-sm font-medium">UI Art Design</div>
-                                                    <div className="h-2 w-2 rounded-full bg-green-500 ml-2" />
+                                        {
+
+                                            users?.map(usr => (
+                                                <div
+                                                    key={usr._id}
+                                                    onClick={() => {
+                                                        setSelected(usr)
+                                                    }}
+                                                >
+                                                    <Usercard usr={usr} />
                                                 </div>
-                                                <div className="text-xs truncate w-40">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Debitis, doloribus?</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="mt-5">
-                                    <div className="text-xs text-gray-400 font-semibold uppercase">Personal</div>
-                                </div>
-                                <div className="h-full overflow-hidden relative pt-2">
-                                    <div className="flex flex-col divide-y h-full overflow-y-auto -mx-4">
-                                        <div className="flex flex-row items-center p-4 relative">
-                                            <div className="flex items-center justify-center h-10 w-10 rounded-full bg-pink-500 text-pink-300 font-bold flex-shrink-0">
-                                                T
-                                            </div>
-                                            <div className="flex flex-col flex-grow ml-3">
-                                                <div className="text-sm font-medium">Flo Steinle</div>
-                                                <div className="text-xs truncate w-40">Good after noon! how can i help you?</div>
-                                            </div>
-                                        </div>
-                                        <div className="flex flex-row items-center p-4">
-                                            <div className="flex items-center justify-center h-10 w-10 rounded-full bg-pink-500 text-pink-300 font-bold flex-shrink-0">
-                                                T
-                                            </div>
-                                            <div className="flex flex-col flex-grow ml-3">
-                                                <div className="flex items-center">
-                                                    <div className="text-sm font-medium">Sarah D</div>
-                                                    <div className="h-2 w-2 rounded-full bg-green-500 ml-2" />
-                                                </div>
-                                                <div className="text-xs truncate w-40">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Debitis, doloribus?</div>
-                                            </div>
-                                        </div>
-                                        <div className="flex flex-row items-center p-4">
-                                            <div className="flex items-center justify-center h-10 w-10 rounded-full bg-pink-500 text-pink-300 font-bold flex-shrink-0">
-                                                T
-                                            </div>
-                                            <div className="flex flex-col flex-grow ml-3">
-                                                <div className="flex items-center">
-                                                    <div className="text-sm font-medium">Sarah D</div>
-                                                    <div className="h-2 w-2 rounded-full bg-green-500 ml-2" />
-                                                </div>
-                                                <div className="text-xs truncate w-40">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Debitis, doloribus?</div>
-                                            </div>
-                                        </div>
-                                        <div className="flex flex-row items-center p-4">
-                                            <div className="flex items-center justify-center h-10 w-10 rounded-full bg-pink-500 text-pink-300 font-bold flex-shrink-0">
-                                                T
-                                            </div>
-                                            <div className="flex flex-col flex-grow ml-3">
-                                                <div className="flex items-center">
-                                                    <div className="text-sm font-medium">Sarah D</div>
-                                                    <div className="h-2 w-2 rounded-full bg-green-500 ml-2" />
-                                                </div>
-                                                <div className="text-xs truncate w-40">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Debitis, doloribus?</div>
-                                            </div>
-                                        </div>
-                                        <div className="flex flex-row items-center p-4">
-                                            <div className="flex items-center justify-center h-10 w-10 rounded-full bg-pink-500 text-pink-300 font-bold flex-shrink-0">
-                                                T
-                                            </div>
-                                            <div className="flex flex-col flex-grow ml-3">
-                                                <div className="flex items-center">
-                                                    <div className="text-sm font-medium">Sarah D</div>
-                                                    <div className="h-2 w-2 rounded-full bg-green-500 ml-2" />
-                                                </div>
-                                                <div className="text-xs truncate w-40">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Debitis, doloribus?</div>
-                                            </div>
-                                        </div>
+                                            ))
+                                        }
                                     </div>
                                 </div>
                             </div>
@@ -266,17 +180,18 @@ const Chat = () => {
 
                     </div>
                 </div>
-                <div className={`chat-container bg-white`}>
+                <div className={`chat-container  bg-white`}>
                     <div className="flex flex-row items-center py-4 px-6 rounded-2xl shadow">
-                        <div className="flex items-center justify-center h-10 w-10 rounded-full bg-pink-500 text-pink-100">
-                            T
+                        <div className="flex items-center justify-center h-12 w-12 rounded-full bg-pink-500 text-pink-100">
+                            <img className='rounded-full' src="https://i.ibb.co/NyHLf36/IMG-20220929-005138.jpg" alt="" />
                         </div>
                         <div className="flex flex-col ml-3">
-                            <div className="font-semibold text-sm">Md Tamiz</div>
+                            <div className="font-semibold text-sm">{selected.name}</div>
                             <div className="text-xs text-gray-500">Active</div>
                         </div>
                         <div className="ml-auto">
                             <ul className="flex flex-row items-center space-x-2">
+
                                 <li>
                                     <div onClick={navigationHand} className="flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-400 h-10 w-10 rounded-full">
                                         <span>
@@ -286,19 +201,24 @@ const Chat = () => {
                                         </span>
                                     </div>
                                 </li>
+
                             </ul>
                         </div>
                     </div>
+
+                    <p className='text-xs mt-2 text-error text-center w-full'>
+                        <i className="fa-solid mr-2 fa-circle-exclamation"></i>
+                        ( Messages Starts From Top )</p>
                     <p className='text-center text-emerald-500 mt-2 text-sm'>{newUser}</p>
-                    <div className="h-[85vh] py-4"
-                        onClick={bottom}
+                    <div className="py-4"
                     >
-                        <div className="h-full overflow-y-auto animate__animated animate__fadeInLeft" id="message-container"
-                            ref={scroolRef}
+                        <div className="h-resp overflow-y-auto animate__animated animate__fadeInLeft" id="message-container"
                         >
                             <div className="grid grid-cols-12 gap-y-2 "
-                                key={uuidv4()}
-
+                                onDoubleClick={() => {
+                                    refetch()
+                                    bottom()
+                                }}
                             >
                                 {
                                     isLoading
@@ -314,11 +234,11 @@ const Chat = () => {
                                         messages?.map(message => {
                                             if (message.email === user.email) {
                                                 return (
-                                                    <CardRight key={message._id} data={message} />
+                                                    <CardRight key={message._id} data={message} user={user} />
                                                 )
                                             }
                                             else {
-                                                return <CardLeft key={message._id} data={message} />
+                                                return <CardLeft key={message._id} data={message} user={user} />
                                             }
                                         })
                                 }
@@ -327,7 +247,6 @@ const Chat = () => {
                         </div>
 
                     </div>
-
                     <form onSubmit={sendMessage} className="flex flex-row items-center">
                         <div className="flex flex-row items-center w-full border rounded-3xl h-12 px-2">
                             <div className="flex items-center justify-center h-10 w-10 text-gray-400 ml-1">

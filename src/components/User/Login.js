@@ -24,7 +24,7 @@ const Login = () => {
       setLoading(true)
       setPError(false)
       seteError(false)
-      const data = { email, password }
+      const data = { email: email.toLocaleLowerCase(), password }
       api.post('/user/login', data)
         .then(res => {
           setLoading(false)
@@ -35,6 +35,9 @@ const Login = () => {
           }
           else if (res.data.message === "Incorrect Password") {
             toast.error("Incorrent Password Please Insert Correct PassWord")
+          }
+          else {
+            console.log(res);
           }
         })
     }

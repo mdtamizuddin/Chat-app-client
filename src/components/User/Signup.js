@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import toast from 'react-hot-toast'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import api from '../Hooks/instance'
 
 const Signup = () => {
@@ -11,6 +11,7 @@ const Signup = () => {
     const [pError, setPError] = useState(false)
     const [eError, seteError] = useState(false)
     const d = new Date()
+    const navigate = useNavigate()
     const year = d.getFullYear()
     const signupHamndler = (e) => {
         e.preventDefault()
@@ -20,11 +21,13 @@ const Signup = () => {
         else if (!email) {
             seteError(true)
         }
-        else if (!password || password < 6) {
+        else if (!password || password.length <= 6) {
             setPError(true)
         }
         else {
-            const data = { name, email, password, date: d }
+            seteError(false)
+            seteError(false)
+            const data = { name, email : email.toLocaleLowerCase(), password, date: d }
             api.post('/user/new', data)
                 .then(res => {
                     if (res.data.message === 'Email Alrady Registerd') {
@@ -32,6 +35,8 @@ const Signup = () => {
                     }
                     else {
                         toast.success(res.data.message)
+                        localStorage.setItem('accessToken', res.data.token)
+                        navigate('/')
                     }
                 })
         }
@@ -83,7 +88,7 @@ const Signup = () => {
                                 pError
                                 &&
                                 <p className="text-red-500 text-xs italic">
-                                    Please choose a password.
+                                    Please choose a password. min 6 character
                                 </p>
                             }
                         </div>
