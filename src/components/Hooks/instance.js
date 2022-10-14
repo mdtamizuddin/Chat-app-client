@@ -1,7 +1,7 @@
 
 import axios from "axios";
-const url = "https://chat-server-omega.vercel.app/";
-// const url = 'http://localhost:5000'
+const url = "https://mdtamiz.xyz";
+// const url = 'http://localhost:3001'
 const api = axios.create({
     baseURL: url,
     headers: {

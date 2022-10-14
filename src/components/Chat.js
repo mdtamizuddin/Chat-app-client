@@ -12,7 +12,7 @@ const Chat = () => {
     const { isLoading, data: messages, refetch } = useQuery(
         ['todos'],
         async () => {
-            const res = await api.get(`/messages/${user.email}`)
+            const res = await api.get(`/api/messages/${user.email}`)
             return res.data
         },
         {
@@ -21,10 +21,10 @@ const Chat = () => {
     )
 
     const { isLoading: loadinguser, data: users, } = useQuery(['All users'], () =>
-        api.get(`/user`)
+        api.get(`/api/user`)
             .then(res => res.data)
     )
-
+    const [image, setImage] = useState('')
     const bottom = () => {
         const objDiv = document.getElementById("message-container");
         objDiv.scrollTop = objDiv.scrollHeight;
@@ -63,11 +63,12 @@ const Chat = () => {
             date: date,
             name: user.name,
             to: selected.email,
-            from: user.email
+            from: user.email,
+            image
         }
         if (message) {
             setMessage('')
-            api.post(`/messages/new`, newMessage)
+            api.post(`/api/messages/new`, newMessage)
                 .then(res => {
                     if (res.status === 200) {
                         refetch()
@@ -129,6 +130,17 @@ const Chat = () => {
                                             </svg>
                                         </span>
                                     </a>
+                                </li>
+                                <li>
+                                    <span
+                                        onClick={() => {
+                                            localStorage.removeItem('accessToken')
+                                            window.location.reload()
+                                        }}
+                                        className="flex items-center">
+                                        <i className="fa-solid
+                                    text-2xl text-red-100 hover:text-red-400 ml-3 fa-right-from-bracket"></i>
+                                    </span>
                                 </li>
                             </ul>
                         </div>
@@ -193,13 +205,28 @@ const Chat = () => {
                             <ul className="flex flex-row items-center space-x-2">
 
                                 <li>
-                                    <div onClick={navigationHand} className="flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-400 h-10 w-10 rounded-full">
-                                        <span>
-                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                                            </svg>
-                                        </span>
-                                    </div>
+                                    {
+                                        user.email === "mdtomiz.official@gmail.com"
+                                            ?
+                                            <div onClick={navigationHand} className="flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-400 h-10 w-10 rounded-full">
+                                                <span>
+                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                                                    </svg>
+                                                </span>
+                                            </div>
+                                            :
+                                            <span
+                                                onClick={() => {
+                                                    localStorage.removeItem('accessToken')
+                                                    window.location.reload()
+                                                }}
+                                                className="flex items-center">
+                                                <i className="fa-solid
+                                        text-2xl text-red-500 ml-3 fa-right-from-bracket"></i>
+                                            </span>
+                                    }
+
                                 </li>
 
                             </ul>
@@ -260,18 +287,24 @@ const Chat = () => {
                                     value={message}
                                     type="text" className="border border-transparent w-full focus:outline-none text-sm h-10 flex items-center" placeholder="Type your message...." />
                             </div>
-                            <div className="flex flex-row">
-                                <button className="flex items-center justify-center h-10 w-8 text-gray-400">
+                            <div className="flex flex-row" >
+                                <label htmlFor='actual-btn' className="flex items-center justify-center h-10 w-8 text-gray-400">
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
                                     </svg>
-                                </button>
-                                <button className="flex items-center justify-center h-10 w-8 text-gray-400 ml-1 mr-2">
+                                </label>
+                                <label htmlFor='actual-btn' className="flex items-center justify-center h-10 w-8 text-gray-400 ml-1 mr-2">
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                     </svg>
-                                </button>
+                                </label>
                             </div>
+                            <input className='hidden' type="file" id="actual-btn" onChange={(e) => {
+                                const formData = new FormData()
+                                formData.append(e.target.files[0])
+                                fetch('')
+
+                            }} />
                         </div>
                         <div className="ml-6">
                             <button type='submit' className="flex items-center justify-center h-10 w-10 rounded-full bg-gray-200 hover:bg-gray-300 text-indigo-800 ">

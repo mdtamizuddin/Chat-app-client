@@ -17,7 +17,7 @@ const Login = () => {
     if (!email) {
       seteError(true)
     }
-    else if (!password) {
+    else if (!password || password.length < 6) {
       setPError(true)
     }
     else {
@@ -25,7 +25,7 @@ const Login = () => {
       setPError(false)
       seteError(false)
       const data = { email: email.toLocaleLowerCase(), password }
-      api.post('/user/login', data)
+      api.post('/api/user/login', data)
         .then(res => {
           setLoading(false)
           if (res.data.message === "wellcome Back") {
@@ -37,7 +37,7 @@ const Login = () => {
             toast.error("Incorrent Password Please Insert Correct PassWord")
           }
           else {
-            console.log(res);
+            toast.error(res.data.message)
           }
         })
     }
@@ -71,7 +71,7 @@ const Login = () => {
                 pError
                 &&
                 <p className="text-red-500 text-xs italic">
-                  Please choose a password.
+                  Please choose a password Min 6 Characters.
                 </p>
               }
             </div>

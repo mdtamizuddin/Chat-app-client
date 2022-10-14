@@ -1,13 +1,15 @@
 import moment from "moment";
+import { useState } from "react";
 import toast from "react-hot-toast";
 import api from "../Hooks/instance";
 
 const CardLeft = ({ data, user }) => {
     const date = moment(data.date).format('MMMM Do YYYY, h:mm:ss a');
+    const [show, setShow] = useState(false)
     const deletee = () => {
         const conf = window.confirm("Are You Sure You want To Unsent This Message")
         if (conf) {
-            api.delete(`/messages/${data._id}`)
+            api.delete(`/api/messages/${data._id}`)
                 .then(res => {
                     if (res.status === 200) {
                         toast.success("Thik Ace Bhalo Thaken")
@@ -26,6 +28,7 @@ const CardLeft = ({ data, user }) => {
                 </div>
                 <div className={`relative ml-3 text-sm bg-white py-2 px-4 shadow rounded-xl ${data?.deleted && "border border-red-500 opacity-50 select-none"} msg-con `}>
                     <div>{data.deleted ? <span className="text-error">Unsend</span> : data?.message}</div>
+                    <img src={data.image} className=" mt-3 rounded-lg" alt="" onClick={()=> setShow(true)}/>
                     <span className="text-[10px] font-semibold text-red-300">{data.name}</span>
                     <p className="text-[8px]">{date}</p>
                     {
@@ -35,9 +38,17 @@ const CardLeft = ({ data, user }) => {
                             <i className="fa-solid p-2 rounded-lg fa-trash text-[15px]  text-red-500"></i>
                         </button>
                     }
+
                 </div>
 
-
+              { 
+              show &&
+              <div className="modal modal-open" >
+                    <div className="modal-box relative">
+                        <label onClick={()=> setShow(false)} className="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
+                        <img src={data.image} className=" mt-5 rounded-lg" alt="" />
+                    </div>
+                </div>}
             </div>
 
         </div>

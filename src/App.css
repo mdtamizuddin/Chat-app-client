@@ -140,16 +140,15 @@ iframe::-webkit-scrollbar {
   }
 }
 
+.bg-gradient {
+  background: rgb(63, 94, 251);
+  background: radial-gradient(circle, rgba(63, 94, 251, 1) 0%, rgb(252, 86, 119) 100%);
+  color: white !important;
+}
+
 @media only screen and (max-width: 600px) {
   .side-bar-chat {
     display: none;
-  }
-
-  .h-resp {
-    height: 65vh;
-  }
-  .chat-main-container {
-    height: 80vh;
   }
 
   .show-side {
@@ -162,7 +161,7 @@ iframe::-webkit-scrollbar {
   }
 
   .chat-container {
-    height: 85vh !important;
+    height: 100vh !important;
     padding-left: 10px;
     padding-right: 10px;
     width: 100%;

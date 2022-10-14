@@ -4,7 +4,7 @@ import api from '../Hooks/instance'
 
 const Usercard = ({ usr }) => {
     const { isLoading, data: messages } = useQuery(['All Messages', usr], () =>
-        api.get(`/messages/${usr?.email}`)
+        api.get(`/api/messages/${usr?.email}`)
             .then(res => res.data)
     )
     if (isLoading) {

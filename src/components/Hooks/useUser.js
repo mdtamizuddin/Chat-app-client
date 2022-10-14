@@ -9,7 +9,7 @@ const useUser = () => {
     useEffect(() => {
         if (token) {
             const decoded = jwt_decode(token);
-            api.get(`/user/${decoded.email}`)
+            api.get(`/api/user/${decoded.email}`)
                 .then(res => setUser(res.data))
         }
     }, [token])

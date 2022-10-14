@@ -1,13 +1,15 @@
 import moment from "moment";
+import { useState } from "react";
 import toast from "react-hot-toast";
 import api from "../Hooks/instance";
 
 const CardRight = ({ data, user }) => {
     const date = moment(data.date).format('MMMM Do YYYY, h:mm:ss a');
+    const [show, setShow] = useState(false)
     const deletee = () => {
         const conf = window.confirm("Are You Sure You want To Unsent This Message")
         if (conf) {
-            api.delete(`/messages/${data._id}`)
+            api.delete(`/api/messages/${data._id}`)
                 .then(res => {
                     if (res.status === 200) {
                         toast.success("Thik Ace Bhalo Thaken")
@@ -24,9 +26,10 @@ const CardRight = ({ data, user }) => {
                 <div className="flex items-center justify-center h-10 w-10 rounded-full bg-indigo-500 flex-shrink-0">
                     {data?.name?.slice(0, 1)}
                 </div>
-                <div className={`relative mr-3 text-sm bg-white py-2 px-4 shadow rounded-xl ${data?.deleted && "border border-red-500 opacity-50 select-none"} msg-con `}>
-                    <div>{data.deleted ? <span className="text-error">Unsend</span> : data.message}</div>
-                    <span className="text-[10px] font-semibold text-red-300">{data.name}</span>
+                <div className={`relative mr-3 text-[15px] bg-white py-2 px-4 shadow rounded-xl ${data?.deleted && "border border-red-500 opacity-50 select-none"} msg-con bg-gradient`}>
+                    <div>{data.deleted ? <span className="text-white">Unsend</span> : data.message}</div>
+                    <img src={data.image} className=" mt-3 rounded-lg" alt="" onClick={() => setShow(true)} />
+                    <span className="text-[10px] font-semibold text-white">{data.name}</span>
                     <p className="text-[8px]">{date}</p>
                     {
                         !data?.deleted && user?.email === data?.email
@@ -37,6 +40,14 @@ const CardRight = ({ data, user }) => {
                     }
                 </div>
             </div>
+            {
+                show &&
+                <div className="modal modal-open" >
+                    <div className="modal-box relative">
+                        <label onClick={() => setShow(false)} className="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
+                        <img src={data.image} className=" mt-5 rounded-lg" alt="" />
+                    </div>
+                </div>}
         </div>
     );
 }
